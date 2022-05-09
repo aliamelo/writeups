@@ -25,7 +25,7 @@ a family of processors used in smartphones, cars and several mobile devices.
 
 The QDSP6 is also known as Hexagon, hence the name of the challenge. The
 processor possess thirty-two 32-bit GPR (`r0-r31`) which can also be accessed
-as 64-bit registers pairs (e.g. `r3:r2`) ans the program's code and data is
+as 64-bit registers pairs (e.g. `r3:r2`). The program's code and data is
 stored in a 32-bit address space. It seems pretty classic.
 
 However the Hexagon architecture has one surprise: it implements multithreading
@@ -54,10 +54,13 @@ fortunately, it isn't stripped. We can quickly reduce the area to explore to
 only two functions: `main` and `getpixel`.
 
 Let's start by the `main` function:
+
 ![main function](img/main_function.png)
 
 The first bit creates the stack frame for the function and calls `scanf`:
+
 ![first bit of main function](img/scanf.png)
+
 The call to `scanf` is equivalent to `scanf("%d %d", &i, &j)`. We can easily
 guess that this is the way to input the coordinates of a pixel.
 
@@ -83,6 +86,7 @@ using a suffix to specify the size, `memw` moves a 32-bit integer.
 Now that we have the basis of the instruction set, let's move on.
 
 ![get index](img/shift.png)
+
 `r3:r2 = combine(r0, r1)` moves `i` and `j` inside a 64-bit register pair but as
 the pair will never be used again it is just a way to do `r3 = r0; r2 = r1` in
 only one instruction.
@@ -97,6 +101,7 @@ split into multiple blocks which are swapped. This array allows to put the
 blocks back into the correct order.
 
 ![insert](img/insert_getpixel.png)
+
 The `Rd = insert(Rs, #width, #off)` instructions copies width bits from the
 least significant part of Rs into Rd shifting them by off. For example with
 `r0 = insert(r3, #0x1A, #6)`, the 26 last bits of `r3` will be shifted by 6 and
@@ -105,6 +110,7 @@ the block retrieved from the array and the low part will be the index of the
 pixel into this block. Then the program will call the `getpixel` function.
 
 ![main end](img/main_end.png)
+
 On the end of the function, the result of `getpixel` is used to get three values
 which are added. We can guess it's the red, green and blue values of the pixel
 as the result will be checked againts `0xc7` in order to determine if the pixel
@@ -113,19 +119,23 @@ is set or not, very much like a binarization of the image.
 ## Pixel perfect
 
 Let's dig into the `getpixel` function:
+
 ![getpixel function](img/getpixel_funtion.png)
 
 The beginning of the function concatenates the coordinates of the pixel into one
 register: `r0 += asl(r1, #9)` (`asl` is arithmethic shift left).
 
 ![xor](img/xor.png)
+
 The `r2` register is used to iterate over the buffer. The buffer containing the
 image is stored at address `0xC428`. Once one value is retrieved, it is XORed
 with `0x55`.
 
 The next conditions are used to determine which will be the value of `r2` for
 the next iteration:
+
 ![conditions](img/conditions.png)
+
 If the value inside `data[r2]` (data being the buffer storing the image inside
 `.data` section) is positive, the next value of `r2` will be
 `r2 + data[r2] * 3 + 1` else it will be `r2 + 4`. It must be some kind of
@@ -137,6 +147,7 @@ Finally, `r3` adds all the values that we retrieve during the loop and if the
 results is bigger than the pixel position, we exit the function.
 
 ![loop break condition](img/return.png)
+
 Otherwise, if `r2` gets too far we break the loop. The return value is the
 position of the pixel inside the buffer.
 
@@ -246,6 +257,7 @@ $ gcc solve.c -o solve -O3
 $ ./solve
 ```
 ![flag](img/flag.png)
+
 And voilà! The flag starts to magically appear in the terminal.
 
 Waiting long enough we can read it entirely:
@@ -259,3 +271,10 @@ computer in C I'm able to get the flag in ~30 seconds (take this python users).
 
 It was a fun challenge and I love to discover new architectures, thanks to the
 creator(s)!
+
+## Useful links
+
+- [](https://en.wikipedia.org/wiki/Qualcomm_Hexagon)
+- [](https://developer.qualcomm.com/qfile/67417/80-n2040-45_b_qualcomm_hexagon_v67_programmer_reference_manual.pdf)
+- [](https://github.com/gsmk/hexagon)
+- [](https://github.com/programa-stic/hexag00n)
