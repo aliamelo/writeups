@@ -102,12 +102,13 @@ blocks back into the correct order.
 
 ![insert](img/insert_getpixel.png)
 
-The `Rd = insert(Rs, #width, #off)` instructions copies width bits from the
-least significant part of Rs into Rd shifting them by off. For example with
-`r0 = insert(r3, #0x1A, #6)`, the 26 last bits of `r3` will be shifted by 6 and
-put into `r0`. The high part of the registers will be filled with the index of
-the block retrieved from the array and the low part will be the index of the
-pixel into this block. Then the program will call the `getpixel` function.
+The `Rd = insert(Rs, #width, #off)` instructions copies `width` bits from the
+least significant part of `Rs` into `Rd` shifting them by `off`. \
+For example with `r0 = insert(r3, #0x1A, #6)`, the 26 last bits of `r3` will be
+shifted by 6 and put into `r0`. The high part of the registers will be filled
+with the index of the block retrieved from the array and the low part will be
+the index of the pixel into this block. Then the program will call the `getpixel`
+function.
 
 ![main end](img/main_end.png)
 
@@ -120,7 +121,7 @@ is set or not, very much like a binarization of the image.
 
 Let's dig into the `getpixel` function:
 
-![getpixel function](img/getpixel_funtion.png)
+![getpixel function](img/getpixel_function.png)
 
 The beginning of the function concatenates the coordinates of the pixel into one
 register: `r0 += asl(r1, #9)` (`asl` is arithmethic shift left).
@@ -164,8 +165,11 @@ to debug.
 
 Let's start by dumping the `.data` section in another file. We will be able to
 load it into a buffer to access the same `.data` section as the `mynd` binary.
+
 `$ objcopy --dump-section .data=data -I elf32-little mynd`
+
 The `objcopy` utility is useful to copy parts of binary into another file.
+
 The `--dump-section .data=data` option tells the program to dump the whole
 `.data` section into another file which will be named `data`. The `-I
 elf32-little` is to specify `objcopy` that the given program is a 32-bits ELF LE
@@ -274,7 +278,7 @@ creator(s)!
 
 ## Useful links
 
-- [](https://en.wikipedia.org/wiki/Qualcomm_Hexagon)
-- [](https://developer.qualcomm.com/qfile/67417/80-n2040-45_b_qualcomm_hexagon_v67_programmer_reference_manual.pdf)
-- [](https://github.com/gsmk/hexagon)
-- [](https://github.com/programa-stic/hexag00n)
+- [https://en.wikipedia.org/wiki/Qualcomm_Hexagon](https://en.wikipedia.org/wiki/Qualcomm_Hexagon)
+- [https://developer.qualcomm.com/qfile/67417/80-n2040-45_b_qualcomm_hexagon_v67_programmer_reference_manual.pdf](https://developer.qualcomm.com/qfile/67417/80-n2040-45_b_qualcomm_hexagon_v67_programmer_reference_manual.pdf)
+- [https://github.com/gsmk/hexagon](https://github.com/gsmk/hexagon)
+- [https://github.com/programa-stic/hexag00n](https://github.com/programa-stic/hexag00n)
